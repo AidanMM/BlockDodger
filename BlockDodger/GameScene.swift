@@ -9,14 +9,20 @@
 import SpriteKit
 
 class GameScene: SKScene {
+    
+    let player = SKSpriteNode(imageNamed:"Box");
+    var total:Int = 0
+    var interval = 4
+    var blocksList: [SKSpriteNode] = []
+    
+    
     override func didMoveToView(view: SKView) {
-        /* Setup your scene here */
-        let myLabel = SKLabelNode(fontNamed:"Chalkduster")
-        myLabel.text = "Hello, World!"
-        myLabel.fontSize = 45
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame))
+        total = Int(self.size.height / player.size.width)
+        player.position = CGPointMake(player.size.width / 2, (size.height / 2  % player.size.height) + player.size.height * CGFloat(total / 2) )
         
-        self.addChild(myLabel)
+        addChild(player)
+        
+        var timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "generateBlockRow", userInfo: nil, repeats: true);
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -25,21 +31,37 @@ class GameScene: SKScene {
         for touch in touches {
             let location = touch.locationInNode(self)
             
-            let sprite = SKSpriteNode(imageNamed:"Spaceship")
+            var playerAction:SKAction
             
-            sprite.xScale = 0.5
-            sprite.yScale = 0.5
-            sprite.position = location
+            if location.x < size.width / 2 {
+                playerAction = SKAction.moveTo(CGPointMake(player.position.x, player.position.y + player.size.height), duration: 0.01)
+            } else {
+                playerAction = SKAction.moveTo(CGPointMake(player.position.x, player.position.y - player.size.height), duration: 0.01)
+            }
             
-            let action = SKAction.rotateByAngle(CGFloat(M_PI), duration:1)
-            
-            sprite.runAction(SKAction.repeatActionForever(action))
-            
-            self.addChild(sprite)
+            player.runAction(playerAction);
         }
     }
    
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+    }
+    
+    func generateBlockRow() {
+        let emptySlot = Int(arc4random()) % total
+        
+        for var i = 0; i < total; i++ {
+            if i != emptySlot {
+                let block = SKSpriteNode(imageNamed: "Box")
+                block.position = CGPointMake(size.width + block.size.width / 2 , (size.height / 2  % player.size.height) + player.size.height * CGFloat(i) )
+                
+                // Create the actions
+                let actionMove = SKAction.moveTo(CGPointMake(-block.size.width / 2, block.position.y), duration: 5)
+                let actionMoveDone = SKAction.removeFromParent()
+                block.runAction(SKAction.sequence([actionMove, actionMoveDone]))
+                
+                addChild(block)
+            }
+        }
     }
 }
