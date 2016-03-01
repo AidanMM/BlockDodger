@@ -14,6 +14,9 @@ class GameScene: SKScene {
     var total:Int = 0
     var interval = 4
     var blocksList: [SKSpriteNode] = []
+    var win = 0 //Temporary variable to make game over screen
+    var lose = 0 //Temporary variable to make game over screen
+    var gameOver = false //Determines if game is over or not
     
     
     override func didMoveToView(view: SKView) {
@@ -22,7 +25,7 @@ class GameScene: SKScene {
         
         addChild(player)
         
-        var timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "generateBlockRow", userInfo: nil, repeats: true);
+        var timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "generateBlockRow", userInfo: nil, repeats: true)
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -40,11 +43,31 @@ class GameScene: SKScene {
             }
             
             player.runAction(playerAction);
+            
+            
         }
     }
    
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        
+        //These are the temporary lose and win states
+        //When you get the correct ones just replace my random variable with the one you want them hooked up with
+        if lose >= 10 && !gameOver {
+            gameOver = true
+            let gameOverScene = GameOverScene(size: size, won: false)
+            gameOverScene.scaleMode = scaleMode
+            let reveal = SKTransition.flipHorizontalWithDuration(0.5)
+            view?.presentScene(gameOverScene, transition: reveal)
+        }
+        if win >= 100 && !gameOver {
+            gameOver = true
+            let gameOverScene = GameOverScene(size: size, won: false)
+            gameOverScene.scaleMode = scaleMode
+            let reveal = SKTransition.flipHorizontalWithDuration(0.5)
+            view?.presentScene(gameOverScene, transition: reveal)
+        }
+        win++
     }
     
     func generateBlockRow() {
