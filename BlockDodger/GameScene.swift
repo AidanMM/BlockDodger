@@ -10,7 +10,15 @@ import Foundation
 import AVFoundation
 import SpriteKit
 
-class GameScene: SKScene, UIGestureRecognizerDelegate {
+struct PhysicsCategory {
+    static let None      : UInt32 = 0
+    static let All       : UInt32 = UInt32.max
+    static let Block     : UInt32 = 0b1       // 1
+    static let Projectile: UInt32 = 0b10      // 2
+    static let Player    : UInt32 = 0b11      // 3
+}
+
+class GameScene: SKScene, UIGestureRecognizerDelegate, SKPhysicsContactDelegate {
     
     let player = SKSpriteNode(imageNamed:"Box");
     var total:Int = 0
@@ -29,10 +37,14 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
         
         player.position = CGPointMake(player.size.width / 2, (size.height / 2  % player.size.height) + player.size.height * CGFloat(total / 2) )
         
-        addChild(player)
+        player.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: player.size.width / 2.0, height: player.size.width / 2.0))
+        player.physicsBody?.dynamic = true
+        player.physicsBody?.categoryBitMask = PhysicsCategory.Player
+        player.physicsBody?.contactTestBitMask = PhysicsCategory.Block
+        player.physicsBody?.collisionBitMask = PhysicsCategory.None
+        player.physicsBody?.usesPreciseCollisionDetection = true
         
-        // Set up timer to recognize when to spawn next line of blocks
-        _ = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "generateBlockRow", userInfo: nil, repeats: true)
+        addChild(player)
         
         //Set up swiping gestures
         let swipeRight = UISwipeGestureRecognizer(target: self, action: "respondToSwipeGesture:")
@@ -49,6 +61,17 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
         //        tap.numberOfTouchesRequired = 2
         tap.delegate = self
         view.addGestureRecognizer(tap)
+        
+        physicsWorld.gravity = CGVectorMake(0, 0)
+        physicsWorld.contactDelegate = self
+        
+        runAction(SKAction.repeatActionForever(
+            SKAction.sequence([
+                SKAction.runBlock(generateBlockRow),
+                SKAction.waitForDuration(2.0)
+                ])
+            ))
+
         
         let format = AVAudioFormat(standardFormatWithSampleRate: tone.sampleRate, channels: 1);
         engine.attachNode(tone)
@@ -87,28 +110,28 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
     
     func tapDetected(sender:UITapGestureRecognizer) {
         // fire bullet
-        let circle = SKShapeNode.init(circleOfRadius: 10)
-        circle.fillColor = SKColor.redColor()
-        circle.position = CGPointMake(player.position.x, player.position.y + player.size.height/2 + 5)
+        let projectile = SKSpriteNode(imageNamed: "Box");
+        projectile.color = SKColor.whiteColor()
+        projectile.position = CGPointMake(player.position.x, player.position.y /*+ player.size.height/2 + 5*/)
+        projectile.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: player.size.width / 2.0, height: player.size.width / 2.0))
+        projectile.physicsBody?.dynamic = true
+        projectile.physicsBody?.categoryBitMask = PhysicsCategory.Projectile
+        projectile.physicsBody?.contactTestBitMask = PhysicsCategory.Block
+        projectile.physicsBody?.collisionBitMask = PhysicsCategory.None
+        projectile.physicsBody?.usesPreciseCollisionDetection = true
+        
         let moveAction = SKAction.moveByX(2000, y: 0, duration: 2)
         let deleteAction = SKAction.removeFromParent()
         let blockAction = SKAction.runBlock({print("Done moving, deleting")})
-        circle.runAction(SKAction.sequence([moveAction,blockAction,deleteAction]))
-        addChild(circle)
+        projectile.runAction(SKAction.sequence([moveAction,blockAction,deleteAction]))
+        addChild(projectile)
     }
    
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered
-
+        //TODO: Remove this code and resolve to a real end-state(probably no win condition)
         //These are the temporary lose and win states
         //When you get the correct ones just replace my random variable with the one you want them hooked up with
-        if lose >= 10 && !gameOver {
-            gameOver = true
-            let gameOverScene = GameOverScene(size: size, won: false)
-            gameOverScene.scaleMode = scaleMode
-            let reveal = SKTransition.flipHorizontalWithDuration(0.5)
-            view?.presentScene(gameOverScene, transition: reveal)
-        }
         if win >= 100 && !gameOver {
             gameOver = true
             let gameOverScene = GameOverScene(size: size, won: false)
@@ -133,6 +156,14 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
                 let block = SKSpriteNode(imageNamed: "Box")
                 block.position = CGPointMake(size.width + block.size.width / 2 * offSet , (size.height / 2  % player.size.height) + player.size.height * CGFloat(i) )
                 
+                //Give the blocks physics bodies
+                //add collision
+                block.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: player.size.width / 2.0, height: player.size.width / 2.0)) // 1
+                block.physicsBody?.dynamic = true // 2
+                block.physicsBody?.categoryBitMask = PhysicsCategory.Block // 3
+                block.physicsBody?.contactTestBitMask = PhysicsCategory.Projectile // 4
+                block.physicsBody?.collisionBitMask = PhysicsCategory.None // 5
+
                 // Create the actions
                 let actionMove = SKAction.moveTo(CGPointMake(-block.size.width / 2, block.position.y), duration: 5)
                 let actionMoveDone = SKAction.removeFromParent()
@@ -140,6 +171,48 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
                 
                 addChild(block)
             }
+        }
+    }
+    
+    func projectileDidCollideWithBlock(projectile:SKSpriteNode, block:SKSpriteNode) {
+        projectile.removeFromParent()
+        block.removeFromParent()
+    }
+    
+    func blockDidCollideWithPlayer(projectile:SKSpriteNode, block:SKSpriteNode) {
+        projectile.removeFromParent()
+        block.removeFromParent()
+        // Not useful for debugging so commented out
+        /*
+        gameOver = true
+        let gameOverScene = GameOverScene(size: size, won: false)
+        gameOverScene.scaleMode = scaleMode
+        let reveal = SKTransition.flipHorizontalWithDuration(0.5)
+        view?.presentScene(gameOverScene, transition: reveal)
+        */
+    }
+    
+    func didBeginContact(contact: SKPhysicsContact) {
+        
+        // 1
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        // 2
+        if ((firstBody.categoryBitMask & PhysicsCategory.Block != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Projectile != 0)) {
+                projectileDidCollideWithBlock(firstBody.node as! SKSpriteNode, block: secondBody.node as! SKSpriteNode)
+        }
+        else if ((firstBody.categoryBitMask & PhysicsCategory.Block != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Player != 0)) {
+                blockDidCollideWithPlayer(firstBody.node as! SKSpriteNode, block: secondBody.node as! SKSpriteNode)
         }
     }
     
@@ -158,7 +231,8 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
     }
 }
 
-
+//I did not create this!  
+//https://github.com/ooper-shlab/ToneGenerator1.0-Swift/blob/master/ToneGenerator/ViewController.swift
 class AVTonePlayerUnit: AVAudioPlayerNode {
     let bufferCapacity: AVAudioFrameCount = 512
     let sampleRate: Double = 44_100.0
