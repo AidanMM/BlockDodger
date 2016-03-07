@@ -24,8 +24,6 @@ class GameScene: SKScene, UIGestureRecognizerDelegate, SKPhysicsContactDelegate 
     var total:Int = 0
     var interval = 4
     var blocksList: [SKSpriteNode] = []
-    var win = 0 //Temporary variable to make game over screen
-    var lose = 0 //Temporary variable to make game over screen
     var gameOver = false //Determines if game is over or not
     
     var engine = AVAudioEngine();
@@ -185,10 +183,10 @@ class GameScene: SKScene, UIGestureRecognizerDelegate, SKPhysicsContactDelegate 
         // Not useful for debugging so commented out
         /*
         gameOver = true
-        let gameOverScene = GameOverScene(size: size, won: false)
-        gameOverScene.scaleMode = scaleMode
+        let gameOverScene = GameOverScene(fileNamed: GameOverScene)
+        gameOverScene!.scaleMode = scaleMode
         let reveal = SKTransition.flipHorizontalWithDuration(0.5)
-        view?.presentScene(gameOverScene, transition: reveal)
+        view?.presentScene(gameOverScene!, transition: reveal)
         */
     }
     
