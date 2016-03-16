@@ -18,22 +18,31 @@ class GameOverScene: SKScene {
     }*/
     
     override func didMoveToView(view: SKView) {
-        let label = SKLabelNode(fontNamed: "Arial")
+        
+        let label = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
         label.text = "Game Over"
-        label.position = CGPointMake(self.size.width/2, self.size.height/2)
+        label.position = CGPointMake(self.size.width/2, self.size.height/2 + 50)
         label.verticalAlignmentMode = .Center
         label.horizontalAlignmentMode = .Center
-        label.fontColor = SKColor.whiteColor()
-        label.fontSize = 20
+        label.fontColor = SKColor.blackColor()
+        label.fontSize = 40
         addChild(label)
         
-        let wait = SKAction.waitForDuration(3.0)
-        let block = SKAction.runBlock{
-            let myScene = MainMenuScene(fileNamed: "MainMenuScene")
-            myScene!.scaleMode = self.scaleMode
-            let reveal = SKTransition.flipHorizontalWithDuration(0.5)
-            self.view?.presentScene(myScene!, transition: reveal)
-        }
-        self.runAction(SKAction.sequence([wait,block]))
+        let label2 = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
+        label2.text = "Your Score: "
+        label2.position = CGPointMake(self.size.width/2, self.size.height/2)
+        label2.verticalAlignmentMode = .Center
+        label2.horizontalAlignmentMode = .Center
+        label2.fontColor = SKColor.blackColor()
+        label2.fontSize = 30
+        addChild(label2)
+        
+    }
+    
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        let myScene = MainMenuScene(fileNamed: "MainMenuScene")
+        myScene!.scaleMode = self.scaleMode
+        let reveal = SKTransition.flipHorizontalWithDuration(0.5)
+        self.view?.presentScene(myScene!, transition: reveal)
     }
 }
