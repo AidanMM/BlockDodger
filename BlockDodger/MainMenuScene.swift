@@ -38,7 +38,7 @@ class MainMenuScene: SKScene {
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        let myScene = GameScene(fileNamed: "GameScene")
+        let myScene = InstructionsScene(fileNamed: "InstructionsScene")
         myScene!.scaleMode = self.scaleMode
         let reveal = SKTransition.flipHorizontalWithDuration(0.5)
         self.view?.presentScene(myScene!, transition: reveal)

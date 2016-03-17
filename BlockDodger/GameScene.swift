@@ -18,6 +18,7 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
     var blocksList: [SKSpriteNode] = []
     var gameOver = false //Determines if game is over or not
     let label = SKLabelNode(fontNamed: "Arial")
+    let scoreLabel = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
     
     override func didMoveToView(view: SKView) {
         backgroundColor = UIColor(colorLiteralRed: 135/255, green: 206/255, blue: 250/255, alpha: 1.0)
@@ -27,6 +28,11 @@ class GameScene: SKScene, UIGestureRecognizerDelegate {
         label.position = CGPointMake(size.width - size.height, 0)
         label.fontSize = 20
         addChild(label)
+        
+        scoreLabel.position = CGPointMake(10, size.height)
+        scoreLabel.text = ("Score: ")
+        scoreLabel.fontSize = 20
+        addChild(scoreLabel)
         
         let colorize = SKAction.colorizeWithColor(UIColor(colorLiteralRed: 0, green: 25/255, blue: 50/255, alpha: 1.0), colorBlendFactor: 1, duration: 10)
         runAction(colorize)

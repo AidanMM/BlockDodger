@@ -37,6 +37,15 @@ class GameOverScene: SKScene {
         label2.fontSize = 30
         addChild(label2)
         
+        let label3 = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
+        label3.text = "Tap to return to menu"
+        label3.position = CGPointMake(self.size.width/2, self.size.height/2 - 100)
+        label3.verticalAlignmentMode = .Center
+        label3.horizontalAlignmentMode = .Center
+        label3.fontColor = SKColor.blackColor()
+        label3.fontSize = 25
+        addChild(label3)
+        
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
