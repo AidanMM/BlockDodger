@@ -10,26 +10,37 @@ import Foundation
 import SpriteKit
 
 //Game Over Screen
-//No longer takes params for win or lose, since game doesn't have a "win state" in the traditional sense
 class GameOverScene: SKScene {
     
-    /*required init(coder aDecoder: NSCoder){
+    let score:CGFloat
+    
+    //Takes size and score
+    init(size: CGSize, score: CGFloat){
+        self.score = score
+        super.init(size: size)
+    }
+    
+    required init(coder aDecoder: NSCoder){
         fatalError("init(coder:) has not been implemented")
-    }*/
+    }
     
     override func didMoveToView(view: SKView) {
         
+        backgroundColor = UIColor(colorLiteralRed: 135/255, green: 206/255, blue: 250/255, alpha: 1.0)
+        
+        //Display Game over
         let label = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
         label.text = "Game Over"
-        label.position = CGPointMake(self.size.width/2, self.size.height/2 + 50)
+        label.position = CGPointMake(self.size.width/2, self.size.height/2 + 150)
         label.verticalAlignmentMode = .Center
         label.horizontalAlignmentMode = .Center
         label.fontColor = SKColor.blackColor()
-        label.fontSize = 40
+        label.fontSize = 60
         addChild(label)
         
+        //And the score you get
         let label2 = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
-        label2.text = "Your Score: "
+        label2.text = "Your Score: \(self.score)"
         label2.position = CGPointMake(self.size.width/2, self.size.height/2)
         label2.verticalAlignmentMode = .Center
         label2.horizontalAlignmentMode = .Center
@@ -49,6 +60,7 @@ class GameOverScene: SKScene {
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        //Tap to return to menu
         let myScene = MainMenuScene(fileNamed: "MainMenuScene")
         myScene!.scaleMode = self.scaleMode
         let reveal = SKTransition.flipHorizontalWithDuration(0.5)

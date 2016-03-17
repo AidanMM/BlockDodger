@@ -14,6 +14,9 @@ class MainMenuScene: SKScene {
     
     override func didMoveToView(view: SKView) {
         
+        backgroundColor = UIColor(colorLiteralRed: 135/255, green: 206/255, blue: 250/255, alpha: 1.0)
+        
+        //Title label
         let label = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
         label.text = "Block Dodger"
         label.position = CGPointMake(self.size.width/2, self.size.height/2 + 200)
@@ -23,7 +26,7 @@ class MainMenuScene: SKScene {
         label.fontSize = 60
         self.addChild(label)
         
-        
+        //Start Game label
         let label2 = SKLabelNode(fontNamed: "Futura-CondensedExtraBold")
         label2.text = "Start Game"
         label2.position = CGPointMake(self.size.width/2, self.size.height/2)
@@ -32,13 +35,11 @@ class MainMenuScene: SKScene {
         label2.fontColor = SKColor.blackColor()
         label2.fontSize = 40
         self.addChild(label2)
-        
-        /*let startButton = TWButton(normalText: "Start Game", highlightedText: "Let's Go")
-        self.addChild(startButton);*/
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        let myScene = InstructionsScene(fileNamed: "InstructionsScene")
+        //Go to instructions screen when tapped
+        let myScene = InstructScene(fileNamed: "InstructScene")
         myScene!.scaleMode = self.scaleMode
         let reveal = SKTransition.flipHorizontalWithDuration(0.5)
         self.view?.presentScene(myScene!, transition: reveal)

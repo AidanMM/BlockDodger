@@ -30,6 +30,7 @@ class Player : SKSpriteNode, SKPhysicsContactDelegate {
     var playerScale:CGFloat = 0.5
     var blockScale:CGFloat = 2.0
     var ammo:Int = 3
+    var ammoTimer:Int = 0
     
     func initialize(scene:GameScene) {
         myScene = scene
@@ -149,6 +150,11 @@ class Player : SKSpriteNode, SKPhysicsContactDelegate {
             }
         }
         level++;
+        ammoTimer++;
+        if(ammoTimer >= 75){
+            ammo++
+            ammoTimer = 0
+        }
         runAction(SKAction.repeatAction(
             SKAction.sequence([
                 SKAction.waitForDuration(0.2),
@@ -195,10 +201,11 @@ class Player : SKSpriteNode, SKPhysicsContactDelegate {
     }
     
     func blockDidCollideWithPlayer(projectile:SKSpriteNode, block:SKSpriteNode) {
-        let gameOverScene = GameOverScene(fileNamed: "GameOverScene")
-        gameOverScene!.scaleMode = (myScene?.scaleMode)!
+        
+        let gameOverScene = GameOverScene(size: (myScene?.size)!, score: self.level)
+        gameOverScene.scaleMode = (myScene?.scaleMode)!
         let reveal = SKTransition.flipHorizontalWithDuration(0.5)
-        myScene!.view!.presentScene(gameOverScene!, transition: reveal)
+        myScene!.view!.presentScene(gameOverScene, transition: reveal)
         removeFromParent()
         
     }
